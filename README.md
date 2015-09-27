@@ -8,4 +8,4 @@ This version will attempt to maximize the given `fitness` function.
 It will select a starting point using the `random` function, and
 find neighbours using `neighbours`.
 
-A simple example is given in [main.cpp](../blob/main.cpp)
+A simple example is given in [main.cpp](main.cpp)
