@@ -24,14 +24,9 @@ namespace tabu
         {
             auto possibles = neighbours(current);
 
-            for (auto& sm : short_memory)
-            {
-                auto it = std::find(possibles.begin(), possibles.end(), sm);
-                if (it != possibles.end())
-                {
-                    possibles.erase(it);
-                }
-            }
+            possibles.erase(std::remove_if(possibles.begin(), possibles.end(), [&](T val) {
+                return std::find(short_memory.begin(), short_memory.end(), val) != short_memory.end();
+            }), possibles.end());
             if (possibles.size() == 0)
             {
                 break;
