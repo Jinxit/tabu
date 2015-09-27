@@ -9,8 +9,12 @@
  
 namespace tabu
 {
+    // attempts to maximize fitness(T) while exploring greedily
+    // but also keeping a short memory to (hopefully) avoid
+    // local maxima
     template<class T>
-    T search(int max_attempts,
+    std::pair<float, T> search(
+             int max_attempts,
              int short_memory_size,
              std::function<float(T)> fitness,
              std::function<T()> random,
@@ -18,36 +22,44 @@ namespace tabu
     {
         std::deque<T> short_memory(short_memory_size, random());
         T current = short_memory.front();
-        T best = current;
-        float best_fitness = fitness(best);
+        auto best = std::make_pair(fitness(current), current);
         for (int i = 0; i < max_attempts; i++)
         {
             auto possibles = neighbours(current);
 
-            possibles.erase(std::remove_if(possibles.begin(), possibles.end(), [&](T val) {
-                return std::find(short_memory.begin(), short_memory.end(), val) != short_memory.end();
-            }), possibles.end());
+            // computes possibles ∖ short_memory
+            possibles.erase(
+                std::remove_if(possibles.begin(), possibles.end(),
+                               [&](T val) {
+                                   auto it = std::find(short_memory.begin(),
+                                                       short_memory.end(), val);
+                                   return it != short_memory.end();
+                               }
+                ), possibles.end());
             if (possibles.size() == 0)
             {
                 break;
             }
 
+            // transforms T -> {fitness(T), T}
             std::vector<std::pair<float, T>> scores;
-            std::transform(possibles.begin(), possibles.end(), std::inserter(scores, scores.begin()), [&](T p) { return std::pair<float, T>(fitness(p), p); });
-            std::sort(scores.begin(), scores.end(), std::greater<std::pair<float, T>>());
+            std::transform(possibles.begin(), possibles.end(),
+                           std::back_inserter(scores),
+                           [&](T p) {
+                                return std::make_pair(fitness(p), p);
+                           }
+            );
 
-            for (auto& kvp : scores)
-            {
-                short_memory.pop_back();
-                short_memory.push_front(kvp.second);
-                if (kvp.first > best_fitness)
-                {
-                    best = kvp.second;
-                    best_fitness = kvp.first;
-                }
-                current = kvp.second;
-                break;
-            }
+            // a maximum element will always exist because possibles isn't empty,
+            // so we can dereference right away
+            auto challenger = *std::max_element(scores.begin(), scores.end());
+
+            short_memory.pop_back();
+            short_memory.push_front(challenger.second);
+
+            best = std::max(best, challenger);
+
+            current = challenger.second;
         }
 
         return best;

@@ -21,6 +21,6 @@ int main(int argc, const char* argv[])
     };
     auto best = tabu::search<int>(20, 5, fitness, random, neighbours);
 
-    std::cout << best << std::endl;
-    std::cout << fitness(best) << std::endl;
+    std::cout << best.second << std::endl;
+    std::cout << best.first << std::endl;
 }
