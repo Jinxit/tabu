@@ -5,8 +5,7 @@
 #include <map>
 #include <utility>
 #include <functional>
- 
-#include <iostream>
+#include <algorithm>
  
 namespace MotionPlanning
 {
