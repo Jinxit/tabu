@@ -51,6 +51,7 @@ namespace tabu
                     best_fitness = kvp.first;
                 }
                 current = kvp.second;
+                break;
             }
         }
 
